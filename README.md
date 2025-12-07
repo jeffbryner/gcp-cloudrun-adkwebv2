@@ -60,3 +60,20 @@ Clicking it will take you to GCP to complete the authorization. You do not need 
 ![Google App Authorization](static/google_app_authorization.png) 
 
 
+Before turning it over to the CICD pipeline, you will need to set the state bucket: 
+
+Change /cicd/*/backend.tf to match the output of terraform output 
+```terraform
+    terraform {
+  backend "gcs" {
+    bucket = "UPDATE_ME_WITH_OUTPUT_OF_INITIAL_INIT"
+    prefix = "cicd"
+  }
+}
+```
+
+Then re-init terraform to allow it to transfer state to GCS: 
+From /cicd/dev and /cicd/prod (once you have dev working)
+```
+terraform init -force-copy
+```
