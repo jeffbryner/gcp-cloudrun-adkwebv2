@@ -35,3 +35,28 @@ Cons: "Drift." You might add a new feature to Dev but forget to copy the configu
 │       └── cloudbuild.yaml
 
 ```
+
+
+## Usage
+To get started
+- clone the repo
+- set the varables in the .tfvars files (use .tfvars.example as a guide)
+- open a terminal in cicd/dev
+- run ```terraform init``` to initialize terraform and providers. 
+- run ```terraform plan``` to check the build plan
+- run ```terraform apply``` to begin the setup 
+
+Note that terraform will not complete due to some chicken/egg problems. 
+- Some services may not complete activiation: Solution: allow activation and retry
+- Authorization: If you do not have the google cloudbuild app for github installed, you'll need to follow steps below
+
+## Authorization
+You will need to authorize the google cloudbuild app to access your github repo. 
+Terraform will fail, and offer a URL like: 
+https://console.cloud.google.com/cloud-build/triggers;region=global/connect?project=123456789
+
+Clicking it will take you to GCP to complete the authorization. You do not need to create triggers.
+
+![Google App Authorization](static/google_app_authorization.png) 
+
+
