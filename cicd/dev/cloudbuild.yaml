@@ -23,7 +23,7 @@ steps:
   # Terraform Init
   # ---------------------------------------------------------   
   - name: 'hashicorp/terraform:light'
-    workingDir: 'cicd/dev'
+    dir: 'cicd/dev'
     entrypoint: 'sh'
     args:
       - '-c'
