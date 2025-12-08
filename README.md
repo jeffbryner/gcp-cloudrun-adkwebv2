@@ -39,7 +39,7 @@ Cons: "Drift." You might add a new feature to Dev but forget to copy the configu
 
 ## Usage
 To get started
-- clone the repo
+- clone the repo, operate in the ```main``` branch 
 - set the varables in the .tfvars files (use .tfvars.example as a guide)
 - open a terminal in cicd/dev
 - run ```terraform init``` to initialize terraform and providers. 
@@ -77,3 +77,5 @@ From /cicd/dev and /cicd/prod (once you have dev working)
 ```
 terraform init -force-copy
 ```
+
+Create a ```dev``` branch and push a change to trigger the CICD pipeline to run. 
