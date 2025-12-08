@@ -76,6 +76,7 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/iam.serviceAccountUser",          # Attach identities to Cloud Run services
     "roles/storage.admin",                   # Read/Write Terraform state files
     "roles/logging.logWriter",               # Write build logs (CRITICAL)
+    "roles/cloudbuild.builds.editor",        # Cloud Build Editor role
     "roles/resourcemanager.projectIamAdmin", # Modify IAM policies (if TF manages IAM)
     "roles/secretmanager.secretAccessor",    # Access secrets from Secret Manager
     "roles/secretmanager.viewer",
