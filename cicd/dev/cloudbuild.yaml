@@ -10,7 +10,7 @@ steps:
   # Step 2: Verify Substitutions & Identity
   # This proves which Branch triggered the build and which Service Account is running it.
   # ---------------------------------------------------------
-  - name: 'ubuntu'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
