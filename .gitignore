@@ -1,5 +1,4 @@
 cicd/*/terraform.tfvars
 cicd/*/.terraform*
 cicd/*/*tfstate*
-cicd/*/backend.tf
 .env
