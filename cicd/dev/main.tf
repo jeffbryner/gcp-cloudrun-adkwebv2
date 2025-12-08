@@ -78,7 +78,8 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/logging.logWriter",               # Write build logs (CRITICAL)
     "roles/resourcemanager.projectIamAdmin", # Modify IAM policies (if TF manages IAM)
     "roles/secretmanager.secretAccessor",    # Access secrets from Secret Manager
-    "roles/serviceusage.serviceUsageAdmin",  # Enable Cloud Build SA to list and enable APIs in the project.
+    "roles/secretmanager.viewer",
+    "roles/serviceusage.serviceUsageAdmin", # Enable Cloud Build SA to list and enable APIs in the project.
   ])
 
   project = local.project_id
