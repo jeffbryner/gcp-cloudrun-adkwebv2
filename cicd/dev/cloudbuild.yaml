@@ -24,12 +24,12 @@ steps:
   # ---------------------------------------------------------   
   - name: 'hashicorp/terraform:light'
     workingDir: 'cicd/dev'
-      entrypoint: 'sh'
-      args:
-        - '-c'
-        - |
-          echo "Running Terraform Plan..."
-          terraform plan
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "Running Terraform Plan..."
+        terraform plan
 
 options:
   logging: CLOUD_LOGGING_ONLY
