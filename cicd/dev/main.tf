@@ -22,6 +22,7 @@ locals {
     "cloudbuild.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
+    "secretmanager.googleapis.com",
   ]
 }
 
@@ -69,11 +70,12 @@ resource "google_service_account" "cloudbuild_sa" {
 # We iterate over a list of roles so we don't repeat code blocks.
 resource "google_project_iam_member" "sa_roles" {
   for_each = toset([
-    "roles/run.admin",                      # Deploy Cloud Run services
-    "roles/iam.serviceAccountUser",         # Attach identities to Cloud Run services
-    "roles/storage.admin",                  # Read/Write Terraform state files
-    "roles/logging.logWriter",              # Write build logs (CRITICAL)
-    "roles/resourcemanager.projectIamAdmin" # Modify IAM policies (if TF manages IAM)
+    "roles/run.admin",                       # Deploy Cloud Run services
+    "roles/iam.serviceAccountUser",          # Attach identities to Cloud Run services
+    "roles/storage.admin",                   # Read/Write Terraform state files
+    "roles/logging.logWriter",               # Write build logs (CRITICAL)
+    "roles/resourcemanager.projectIamAdmin", # Modify IAM policies (if TF manages IAM)
+    "roles/secretmanager.secretAccessor"     # Access secrets from Secret Manager
   ])
 
   project = local.project_id
@@ -102,5 +104,26 @@ resource "google_cloudbuild_trigger" "deploy_trigger" {
 
   # Point to your build file
   filename = "/cicd/dev/cloudbuild.yaml"
+
 }
 
+# secrets for the terraform tfvars
+resource "google_secret_manager_secret" "tfvars" {
+  secret_id = "tfvars"
+  project   = local.project_id
+
+  labels = {
+    label = "secret-tfvars"
+  }
+
+  replication {
+    user_managed {
+      replicas {
+        location = var.default_region
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.services
+  ]
+}

@@ -48,3 +48,5 @@ variable "project_labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "bucket" {} # Dummy variable (never used in resources)

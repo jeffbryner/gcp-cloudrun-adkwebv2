@@ -19,6 +19,15 @@ steps:
         echo "******************************************************"
         echo "Checking access to Cloud Storage..."
         gsutil ls gs:// || echo "WARNING: Could not list buckets. Check permissions."
+        ## position our tfvars file retrieved from secret manager
+        echo "Retrieving terraform.tfvars from Secret Manager..."
+        gcloud secrets versions access latest \
+                  --secret="tfvars" \
+                  --project="$PROJECT_ID" > cicd/dev/terraform.auto.tfvars
+        ## extract bucket name from tfvars for backend config
+        BUCKET_NAME=$(grep 'bucket' cicd/dev/terraform.auto.tfvars | awk -F'"' '{print $2}')
+        echo "Found Bucket: $BUCKET_NAME"
+        echo "$BUCKET_NAME" > /workspace/backend_bucket.txt
   # ---------------------------------------------------------
   # Terraform Init
   # ---------------------------------------------------------   
@@ -28,6 +37,11 @@ steps:
     args:
       - '-c'
       - |
+        echo
+        TF_BUCKET=$(cat /workspace/backend_bucket.txt)
+        echo "Running Terraform Init..."
+        terraform init \
+          -backend-config="bucket=${TF_BUCKET}"
         echo "Running Terraform Plan..."
         terraform plan
 
