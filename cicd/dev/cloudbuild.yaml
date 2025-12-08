@@ -40,7 +40,7 @@ steps:
         TF_BUCKET=$(cat /workspace/backend_bucket.txt)
         echo "Running Terraform Init..."
         terraform init \
-          -backend-config="bucket=${TF_BUCKET}"
+          -backend-config="bucket=$${TF_BUCKET}"
         echo "Running Terraform Plan..."
         terraform plan
 
