@@ -37,17 +37,20 @@ Cons: "Drift." You might add a new feature to Dev but forget to copy the configu
 ```
 
 
-## Usage
-To get started
+## Usage / Bootstrapping
+To get started we will take the repo and bootstrap ourselves into a GCP cloudbuild pipeline. 
+
 - clone the repo, operate in the ```main``` branch 
 - set the varables in the .tfvars files (use .tfvars.example as a guide)
-- open a terminal in cicd/dev
+- open a shell in cicd/dev
 - run ```terraform init``` to initialize terraform and providers. 
 - run ```terraform plan``` to check the build plan
-- run ```terraform apply``` to begin the setup 
+- run ```terraform apply -target=module.gcp_project_setup``` to bootstrap the project and build pipeline
 
-Note that terraform will not complete due to some chicken/egg problems. 
-- Some services may not complete activiation: Solution: allow activation and retry
+
+
+Note that terraform may not complete due to some chicken/egg problems. 
+- Some services may not complete activiation: Solution: wait a bit to allow activation and retry
 - Authorization: If you do not have the google cloudbuild app for github installed, you'll need to follow steps below
 
 ## Authorization
@@ -60,22 +63,31 @@ Clicking it will take you to GCP to complete the authorization. You do not need 
 ![Google App Authorization](static/google_app_authorization.png) 
 
 
-Before turning it over to the CICD pipeline, you will need to set the state bucket: 
+Before turning things over to the CICD pipeline, you will need to set the state bucket: 
 
-Change /cicd/*/backend.tf to match the output of terraform output 
-```terraform
-    terraform {
-  backend "gcs" {
-    bucket = "UPDATE_ME_WITH_OUTPUT_OF_INITIAL_INIT"
-    prefix = "cicd"
-  }
-}
-```
+Rename backend.tf.example to backend.tf to enable state to be stored in the bucket created in the bootstrap step. 
 
 Then re-init terraform to allow it to transfer state to GCS: 
 From /cicd/dev and /cicd/prod (once you have dev working)
 ```
-terraform init -force-copy
+terraform init -force-copy -backend-config="bucket=<name of the bucket from terraform -output>"
 ```
+
+Lastly, to avoid terraform vars ending up in a repo AND to allow our CICD pipeline to use the terraform state in the bucket we will add variables to the 'tfvars' google cloud secret. 
+
+Create a text file with  the following variables:
+(don't include the <> brackets, but do enclose in quotes) 
+
+org_id          = "<your gcp org id number>"
+billing_account = "<your billing account GUID>"
+project_name    = "<your friendly name for the project>"
+folder_id       = "<the integer number of the folder where youd like the project to live>"
+github_org      = "<your githug org name>"
+github_repo     = "<the github repo you want to use>"
+bucket          = "<name of the bucket from terraform -output>"
+
+In the GCP console for secret manager https://console.cloud.google.com/security/secret-manager
+Upload this file as a new 'version' of the 'tfvars' secret. This will be used by cloudbuild at build time. 
+Note: Technically the bucket isn't a real terraform variable, but we store it here harmlessly as a way to avoid having to store extra secrets just for another variable. 
 
 Create a ```dev``` branch and push a change to trigger the CICD pipeline to run. 
