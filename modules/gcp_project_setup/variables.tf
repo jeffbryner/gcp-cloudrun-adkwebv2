@@ -1,7 +1,6 @@
 variable "project_name" {
   description = "Project name of the devops project to host CI/CD resources"
   type        = string
-  default     = ""
 }
 
 variable "github_org" {
@@ -37,16 +36,23 @@ variable "billing_account" {
   type        = string
 }
 
-variable "parent_folder" {
-  description = "GCP parent folder ID in the form folders/{id}"
-  default     = ""
-  type        = string
-}
-
 variable "project_labels" {
   description = "Labels to apply to the project."
   type        = map(string)
   default     = {}
 }
 
-variable "bucket" {} # Dummy variable (never used in resources)
+variable "environment" {
+  description = "The environment for the project (e.g., dev, prod)."
+  type        = string
+}
+
+variable "branch_name" {
+  description = "The branch name for the cloudbuild trigger"
+  type = string
+}
+
+variable "cloudbuild_filename" {
+  description = "The path to the cloudbuild yaml file"
+  type = string
+}

@@ -1,16 +1,9 @@
 steps:
   # ---------------------------------------------------------
-  # Step 1: Verify Code Checkout
-  # This proves that Cloud Build successfully pulled your repo.
+  # Verify Substitutions & Identity
+  # Some debug/environment output
   # ---------------------------------------------------------
-  - name: 'ubuntu'
-    args: ['ls', '-la']
-
-  # ---------------------------------------------------------
-  # Step 2: Verify Substitutions & Identity
-  # This proves which Branch triggered the build and which Service Account is running it.
-  # ---------------------------------------------------------
-  - name: 'ubuntu'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
@@ -24,18 +17,32 @@ steps:
         echo "Currently running as:"
         gcloud auth list
         echo "******************************************************"
-
+        echo "Checking access to Cloud Storage..."
+        gsutil ls gs:// || echo "WARNING: Could not list buckets. Check permissions."
+        ## position our tfvars file retrieved from secret manager
+        echo "Retrieving terraform.tfvars from Secret Manager..."
+        gcloud secrets versions access latest \
+                  --secret="tfvars" \
+                  --project="$PROJECT_ID" > cicd/dev/terraform.auto.tfvars
+        ## extract bucket name from tfvars for backend config
+        BUCKET_NAME=$(grep 'bucket' cicd/dev/terraform.auto.tfvars | awk -F'"' '{print $$2}')
+        echo "Found Bucket: $$BUCKET_NAME"
+        echo "$$BUCKET_NAME" > /workspace/backend_bucket.txt
   # ---------------------------------------------------------
-  # Step 3: Verify Network/API Access (Optional)
-  # This proves your Service Account has basic read permissions.
-  # ---------------------------------------------------------
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
+  # Terraform Init
+  # ---------------------------------------------------------   
+  - name: 'hashicorp/terraform:light'
+    dir: 'cicd/dev'
+    entrypoint: 'sh'
     args:
       - '-c'
       - |
-        echo "Checking access to Cloud Storage..."
-        gsutil ls gs:// || echo "WARNING: Could not list buckets. Check permissions."
+        TF_BUCKET=$(cat /workspace/backend_bucket.txt)
+        echo "Running Terraform Init..."
+        terraform init \
+          -backend-config="bucket=$${TF_BUCKET}"
+        echo "Running Terraform Plan..."
+        terraform plan
 
 options:
   logging: CLOUD_LOGGING_ONLY
