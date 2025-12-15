@@ -45,7 +45,7 @@ To get started we will take the repo and bootstrap ourselves into a GCP cloudbui
 - open a shell in cicd/dev
 - render the backend.tf file inert (we don't have a bucket yet) by renaming to backend.tf.inert
 - run ```terraform init``` to initialize terraform and providers. 
-- run ```terraform plan``` to check the build plan
+- run ```terraform plan -target=module.gcp_project_setup``` to check the bootstrap build plan
 - run ```terraform apply -target=module.gcp_project_setup``` to bootstrap the project and build pipeline
 
 

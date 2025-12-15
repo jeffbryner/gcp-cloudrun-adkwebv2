@@ -92,7 +92,7 @@ resource "google_project_iam_member" "sa_roles" {
 resource "google_cloudbuild_trigger" "deploy_trigger" {
   name        = "deploy-branch"
   description = "Deploys application on push to branch"
-  location    = "global"
+  location    = var.default_region
   project     = local.project_id
 
   # Link the specific Service Account here
