@@ -18,6 +18,7 @@ locals {
   project_id      = module.gcp_project_setup.project_id
   location        = var.default_region
   service_name    = var.service_name
+  cloudbuild_sa   = "serviceAccount:${module.gcp_project_setup.cloudbuild_sa.email}"
   gar_repo_name   = "prj-containers" #container artifact registry repository
   art_bucket_name = format("bkt-%s-%s", "artifacts", local.project_id)
 }
@@ -51,12 +52,12 @@ resource "google_storage_bucket" "cloudbuild_artifacts" {
 resource "google_storage_bucket_iam_member" "cloudbuild_artifacts_iam" {
   bucket = google_storage_bucket.cloudbuild_artifacts.name
   role   = "roles/storage.admin"
-  member = module.gcp_project_setup.cloudbuild_service_account
+  member = local.cloudbuild_sa
 }
 
 resource "google_artifact_registry_repository" "image-repo" {
   provider = google-beta
-  project  = google_project.cicd.project_id
+  project  = local.project_id
 
   location      = local.location
   repository_id = local.gar_repo_name
@@ -66,12 +67,12 @@ resource "google_artifact_registry_repository" "image-repo" {
 
 resource "google_artifact_registry_repository_iam_member" "terraform-image-iam" {
   provider = google-beta
-  project  = google_project.cicd.project_id
+  project  = local.project_id
 
   location   = google_artifact_registry_repository.image-repo.location
   repository = google_artifact_registry_repository.image-repo.name
   role       = "roles/artifactregistry.writer"
-  member     = module.gcp_project_setup.cloudbuild_service_account
+  member     = local.cloudbuild_sa
   depends_on = [
     google_artifact_registry_repository.image-repo
   ]
