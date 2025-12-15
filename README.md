@@ -43,6 +43,7 @@ To get started we will take the repo and bootstrap ourselves into a GCP cloudbui
 - clone the repo, operate in the ```main``` branch 
 - set the varables in the .tfvars files (use .tfvars.example as a guide)
 - open a shell in cicd/dev
+- render the backend.tf file inert (we don't have a bucket yet) by renaming to backend.tf.inert
 - run ```terraform init``` to initialize terraform and providers. 
 - run ```terraform plan``` to check the build plan
 - run ```terraform apply -target=module.gcp_project_setup``` to bootstrap the project and build pipeline
@@ -65,7 +66,7 @@ Clicking it will take you to GCP to complete the authorization. You do not need 
 
 Before turning things over to the CICD pipeline, you will need to set the state bucket: 
 
-Rename backend.tf.example to backend.tf to enable state to be stored in the bucket created in the bootstrap step. 
+Rename backend.tf.inert to backend.tf to enable state to be stored in the bucket created in the bootstrap step. 
 
 Then re-init terraform to allow it to transfer state to GCS: 
 From /cicd/dev and /cicd/prod (once you have dev working)

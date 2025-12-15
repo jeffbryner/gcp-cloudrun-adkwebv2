@@ -40,7 +40,7 @@ resource "google_project" "target_project" {
 }
 
 # bucket for terraform state
-resource "google_storage_bucket" "project_terraform_state" {
+resource "google_storage_bucket" "terraform_state_bucket" {
   project                     = google_project.target_project.project_id
   name                        = local.state_bucket_name
   location                    = var.default_region
