@@ -50,3 +50,9 @@ variable "project_labels" {
 }
 
 variable "bucket" {} # Dummy variable (never used in resources)
+
+variable "service_name" {
+  description = "The name of your cloud run service"
+  type        = string
+  default     = "default-cloudrun-srv"
+}
