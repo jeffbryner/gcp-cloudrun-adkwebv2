@@ -15,10 +15,11 @@ module "gcp_project_setup" {
 }
 
 locals {
-  project_id    = module.gcp_project_setup.project_id
-  location      = var.default_region
-  service_name  = var.service_name
-  gar_repo_name = "prj-containers" #container artifact registry repository
+  project_id      = module.gcp_project_setup.project_id
+  location        = var.default_region
+  service_name    = var.service_name
+  gar_repo_name   = "prj-containers" #container artifact registry repository
+  art_bucket_name = format("bkt-%s-%s", "artifacts", local.project_id)
 }
 
 # trigger builds on file changes in the container directory
@@ -35,6 +36,46 @@ resource "null_resource" "cloudbuild_cloudrun_container" {
   }
 }
 
+# create a bucket for cloudbuild artifacts
+resource "google_storage_bucket" "cloudbuild_artifacts" {
+  project                     = local.project_id
+  name                        = local.art_bucket_name
+  location                    = var.default_region
+  uniform_bucket_level_access = true
+  force_destroy               = true
+  versioning {
+    enabled = true
+  }
+}
+
+resource "google_storage_bucket_iam_member" "cloudbuild_artifacts_iam" {
+  bucket = google_storage_bucket.cloudbuild_artifacts.name
+  role   = "roles/storage.admin"
+  member = module.gcp_project_setup.cloudbuild_service_account
+}
+
+resource "google_artifact_registry_repository" "image-repo" {
+  provider = google-beta
+  project  = google_project.cicd.project_id
+
+  location      = local.location
+  repository_id = local.gar_repo_name
+  description   = "Docker repository for images used by Cloud Build"
+  format        = "DOCKER"
+}
+
+resource "google_artifact_registry_repository_iam_member" "terraform-image-iam" {
+  provider = google-beta
+  project  = google_project.cicd.project_id
+
+  location   = google_artifact_registry_repository.image-repo.location
+  repository = google_artifact_registry_repository.image-repo.name
+  role       = "roles/artifactregistry.writer"
+  member     = module.gcp_project_setup.cloudbuild_service_account
+  depends_on = [
+    google_artifact_registry_repository.image-repo
+  ]
+}
 
 # set a project policy to allow allUsers invoke
 resource "google_project_organization_policy" "services_policy" {
