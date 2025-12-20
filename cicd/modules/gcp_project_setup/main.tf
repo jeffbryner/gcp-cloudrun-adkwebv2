@@ -25,6 +25,10 @@ locals {
     "secretmanager.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com",
+    "cloudidentity.googleapis.com",
+    "appengine.googleapis.com"
   ]
 }
 
@@ -83,9 +87,10 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/serviceusage.serviceUsageAdmin", # Enable Cloud Build SA to list and enable APIs in the project.
   ])
 
-  project = local.project_id
-  role    = each.key
-  member  = "serviceAccount:${google_service_account.cloudbuild_sa.email}"
+  project    = local.project_id
+  role       = each.key
+  member     = "serviceAccount:${google_service_account.cloudbuild_sa.email}"
+  depends_on = [google_project_service.services]
 }
 
 # Cloud Build Trigger

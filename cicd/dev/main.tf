@@ -32,7 +32,7 @@ resource "null_resource" "cloudbuild_cloudrun_container" {
 
   provisioner "local-exec" {
     command = <<EOT
-      gcloud builds submit ../../src/container/ --project ${module.gcp_project_setup.project_id}  --substitutions=_SERVICE_NAME=${var.service_name} --config=../../src/container/cloudbuild.yaml
+      gcloud builds submit ../../src/container/ --project ${local.project_id}  --substitutions=_SERVICE_NAME=${local.service_name} --config=../../src/container/cloudbuild.yaml
   EOT
   }
 }
@@ -41,7 +41,7 @@ resource "null_resource" "cloudbuild_cloudrun_container" {
 resource "google_storage_bucket" "cloudbuild_artifacts" {
   project                     = local.project_id
   name                        = local.art_bucket_name
-  location                    = var.default_region
+  location                    = local.location
   uniform_bucket_level_access = true
   force_destroy               = true
   versioning {
