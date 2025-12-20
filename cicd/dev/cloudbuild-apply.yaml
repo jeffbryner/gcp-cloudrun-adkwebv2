@@ -31,7 +31,7 @@ steps:
   # ---------------------------------------------------------
   # Gcloud/Terraform apply
   # ---------------------------------------------------------   
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim''
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     dir: 'cicd/dev'
     entrypoint: 'bash'
     args:
