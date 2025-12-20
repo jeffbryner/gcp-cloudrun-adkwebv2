@@ -42,7 +42,7 @@ steps:
         apt-get -y update && apt-get -y install unzip wget
 
         # 2. Download Terraform (Change version 1.5.7 to whatever you use)
-        wget https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+        wget -q https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
 
         # 3. Unzip and move to path
         unzip terraform_1.5.7_linux_amd64.zip
