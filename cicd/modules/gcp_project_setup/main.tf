@@ -89,7 +89,7 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/developerconnect.readTokenAccessor", # enable terrafor to read tokens for cloudbuild triggers.
     "roles/developerconnect.user",              # enable terraform to reference repos
     "roles/iam.serviceAccountAdmin",            # manage service accounts
-    "roles/artifactregistry.repoAdmin",         # manage artifact registry repos  
+    "roles/artifactregistry.admin",             # create and manage artifact registry repos
   ])
 
   project    = local.project_id
