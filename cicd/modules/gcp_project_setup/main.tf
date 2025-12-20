@@ -79,15 +79,16 @@ resource "google_project_iam_member" "sa_roles" {
   for_each = toset([
     "roles/run.admin",                       # Deploy Cloud Run services
     "roles/iam.serviceAccountUser",          # Attach identities to Cloud Run services
-    "roles/storage.admin",                   # Read/Write Terraform state files
-    "roles/logging.logWriter",               # Write build logs (CRITICAL)
+    "roles/storage.admin",                   # Manage GCS buckets, Read/Write Terraform state files
+    "roles/logging.logWriter",               # Write build logs
     "roles/cloudbuild.builds.editor",        # Cloud Build Editor role
     "roles/resourcemanager.projectIamAdmin", # Modify IAM policies (if TF manages IAM)
     "roles/secretmanager.secretAccessor",    # Access secrets from Secret Manager
     "roles/secretmanager.viewer",
     "roles/serviceusage.serviceUsageAdmin",     # Enable Cloud Build SA to list and enable APIs in the project.
     "roles/developerconnect.readTokenAccessor", # enable terrafor to read tokens for cloudbuild triggers.
-    "roles/developerconnect.user"               # enable terraform to reference repos
+    "roles/developerconnect.user",              # enable terraform to reference repos
+    "roles/iam.serviceAccountAdmin"             # manage service accounts
   ])
 
   project    = local.project_id
