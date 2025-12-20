@@ -29,7 +29,8 @@ locals {
     "run.googleapis.com",
     "cloudidentity.googleapis.com",
     "appengine.googleapis.com",
-    "developerconnect.googleapis.com"
+    "developerconnect.googleapis.com",
+    "aiplatform.googleapis.com"
   ]
 }
 
