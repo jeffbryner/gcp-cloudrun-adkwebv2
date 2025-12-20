@@ -90,6 +90,7 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/developerconnect.user",              # enable terraform to reference repos
     "roles/iam.serviceAccountAdmin",            # manage service accounts
     "roles/artifactregistry.admin",             # create and manage artifact registry repos
+    "roles/run.admin",                          # manage cloud run services
   ])
 
   project    = local.project_id
