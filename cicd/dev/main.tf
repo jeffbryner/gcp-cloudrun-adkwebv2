@@ -115,17 +115,19 @@ resource "google_artifact_registry_repository_iam_member" "terraform-image-iam" 
   ]
 }
 
-# set a project policy to allow allUsers invoke
-resource "google_project_organization_policy" "services_policy" {
-  project    = local.project_id
-  constraint = "iam.allowedPolicyMemberDomains"
+# if needed set a project policy to allow allUsers invoke
+# will need to enable the org policy api first and grant the service account permissions
+# https://cloud.google.com/run/docs/securing/iam#allow_unauthenticated_access
+# resource "google_project_organization_policy" "services_policy" {
+#   project    = local.project_id
+#   constraint = "iam.allowedPolicyMemberDomains"
 
-  list_policy {
-    allow {
-      all = true
-    }
-  }
-}
+#   list_policy {
+#     allow {
+#       all = true
+#     }
+#   }
+# }
 
 
 # dedicated service account for our cloudrun service
