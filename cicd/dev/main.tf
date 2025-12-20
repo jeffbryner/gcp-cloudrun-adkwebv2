@@ -28,7 +28,7 @@ resource "null_resource" "cloudbuild_cloudrun_container" {
 
   provisioner "local-exec" {
     command = <<EOT
-    gcloud builds submit ../../src/container/ --project ${local.project_id}  --substitutions=_SERVICE_NAME=${local.service_name} --config=../../src/container/cloudbuild.yaml --service-account=${module.gcp_project_setup.cloudbuild_sa.email}
+    gcloud builds submit ../../src/container/ --project ${local.project_id}  --substitutions=_SERVICE_NAME=${local.service_name} --config=../../src/container/cloudbuild.yaml --service-account=/projects/${module.gcp_project_setup.cloudbuild_sa.project}/serviceAccounts/${module.gcp_project_setup.cloudbuild_sa.id}
   EOT
   }
 }
