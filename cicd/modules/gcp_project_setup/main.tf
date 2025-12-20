@@ -94,29 +94,7 @@ resource "google_project_iam_member" "sa_roles" {
   depends_on = [google_project_service.services]
 }
 
-# Cloud Build Trigger
-resource "google_cloudbuild_trigger" "deploy_trigger" {
-  name        = "deploy-branch"
-  description = "Deploys application on push to branch"
-  location    = var.default_region
-  project     = local.project_id
 
-  # Link the specific Service Account here
-  service_account = google_service_account.cloudbuild_sa.id
-
-  # Connect to your GitHub Repo
-  github {
-    owner = var.github_org
-    name  = var.github_repo
-    push {
-      branch = var.branch_name
-    }
-  }
-
-  # Point to your build file
-  filename = var.cloudbuild_filename
-
-}
 
 # secrets for the terraform tfvars
 resource "google_secret_manager_secret" "tfvars" {
