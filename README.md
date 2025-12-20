@@ -92,3 +92,10 @@ Upload this file as a new 'version' of the 'tfvars' secret. This will be used by
 Note: Technically the bucket isn't a real terraform variable, but we store it here harmlessly as a way to avoid having to store extra secrets just for another variable. 
 
 Create a ```dev``` branch and push a change to trigger the CICD pipeline to run. 
+
+
+# TODOs
+
+- migrate to developer connect
+- handle service-<projet number>@gcp-sa-cloudbuild.iam.gserviceaccount.com: needing 
+    roles/developerconnect.tokenAccessor on prj-name

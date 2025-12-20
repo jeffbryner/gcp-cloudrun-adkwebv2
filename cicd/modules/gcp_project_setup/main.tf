@@ -85,7 +85,9 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/resourcemanager.projectIamAdmin", # Modify IAM policies (if TF manages IAM)
     "roles/secretmanager.secretAccessor",    # Access secrets from Secret Manager
     "roles/secretmanager.viewer",
-    "roles/serviceusage.serviceUsageAdmin", # Enable Cloud Build SA to list and enable APIs in the project.
+    "roles/serviceusage.serviceUsageAdmin",     # Enable Cloud Build SA to list and enable APIs in the project.
+    "roles/developerconnect.readTokenAccessor", # enable terrafor to read tokens for cloudbuild triggers.
+    "roles/developerconnect.user"               # enable terraform to reference repos
   ])
 
   project    = local.project_id

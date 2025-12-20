@@ -1,9 +1,7 @@
 module "gcp_project_setup" {
-  source = "../modules/gcp_project_setup"
-
+  source          = "../modules/gcp_project_setup"
+  environment     = "dev"
   project_name    = var.project_name
-  github_org      = var.github_org
-  github_repo     = var.github_repo
   default_region  = var.default_region
   org_id          = var.org_id
   folder_id       = var.folder_id

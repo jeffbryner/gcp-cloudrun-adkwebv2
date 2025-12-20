@@ -37,9 +37,3 @@ variable "environment" {
   description = "The environment for the project (e.g., dev, prod)."
   type        = string
 }
-
-variable "branch_name" {
-  description = "The branch name for the cloudbuild trigger"
-  type        = string
-}
-
