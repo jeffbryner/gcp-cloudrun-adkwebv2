@@ -3,15 +3,6 @@ variable "project_name" {
   type        = string
 }
 
-variable "github_org" {
-  description = "GitHub organization or user name where the repo is hosted."
-  type        = string
-}
-
-variable "github_repo" {
-  description = "GitHub repository name."
-  type        = string
-}
 
 variable "default_region" {
   description = "Default region to create resources where applicable."
@@ -45,14 +36,4 @@ variable "project_labels" {
 variable "environment" {
   description = "The environment for the project (e.g., dev, prod)."
   type        = string
-}
-
-variable "branch_name" {
-  description = "The branch name for the cloudbuild trigger"
-  type = string
-}
-
-variable "cloudbuild_filename" {
-  description = "The path to the cloudbuild yaml file"
-  type = string
 }

@@ -1,17 +1,13 @@
 module "gcp_project_setup" {
-  source = "../modules/gcp_project_setup"
+  source          = "../modules/gcp_project_setup"
+  environment     = "dev"
+  project_name    = var.project_name
+  default_region  = var.default_region
+  org_id          = var.org_id
+  folder_id       = var.folder_id
+  billing_account = var.billing_account
+  project_labels  = var.project_labels
 
-  project_name        = var.project_name
-  github_org          = var.github_org
-  github_repo         = var.github_repo
-  default_region      = var.default_region
-  org_id              = var.org_id
-  folder_id           = var.folder_id
-  billing_account     = var.billing_account
-  project_labels      = var.project_labels
-  environment         = "dev"
-  branch_name         = "^dev$"
-  cloudbuild_filename = "/cicd/dev/cloudbuild.yaml"
 }
 
 locals {
@@ -32,16 +28,57 @@ resource "null_resource" "cloudbuild_cloudrun_container" {
 
   provisioner "local-exec" {
     command = <<EOT
-      gcloud builds submit ../../src/container/ --project ${module.gcp_project_setup.project_id}  --substitutions=_SERVICE_NAME=${var.service_name} --config=../../src/container/cloudbuild.yaml
+      gcloud builds submit ../../src/container/ --project ${local.project_id}  --substitutions=_SERVICE_NAME=${local.service_name} --config=../../src/container/cloudbuild.yaml
   EOT
   }
 }
+
+
+# Cloud Build Trigger
+# If using developer connect, you need to set up the connection first in GCP console
+# and likely will need to create the trigger manually as well
+# resource "google_cloudbuild_trigger" "deploy_trigger" {
+#   name        = "deploy-branch"
+#   description = "Deploys application on push to branch"
+#   location    = var.default_region
+#   project     = local.project_id
+
+#   # Link the specific Service Account here
+#   service_account = local.cloudbuild_sa
+
+#   # Connect to your GitHub Repo (github or developer_connect stanza)
+#   https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloudbuild_trigger#example-usage---cloudbuild-trigger-developer-connect-push
+#   github {
+#     owner = var.github_org
+#     name  = var.github_repo
+#     push {
+#       branch = var.branch_name
+#     }
+#   }
+# OR
+#   developer_connect_event_config {
+#     git_repository_link = "projects/cryptic-tower-286020/locations/us-central1/connections/prod-bbs-push/gitRepositoryLinks/cbprob-prod-us-central1-push1"
+#     push {
+#       branch = "main"
+#     }
+#   }
+#   filename = "cloudbuild.yaml"
+# }
+
+
+
+#   # Point to your build file
+#   filename = var.cloudbuild_filename
+
+# }
+
+
 
 # create a bucket for cloudbuild artifacts
 resource "google_storage_bucket" "cloudbuild_artifacts" {
   project                     = local.project_id
   name                        = local.art_bucket_name
-  location                    = var.default_region
+  location                    = local.location
   uniform_bucket_level_access = true
   force_destroy               = true
   versioning {

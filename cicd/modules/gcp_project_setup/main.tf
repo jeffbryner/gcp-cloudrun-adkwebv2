@@ -25,6 +25,11 @@ locals {
     "secretmanager.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com",
+    "cloudidentity.googleapis.com",
+    "appengine.googleapis.com",
+    "developerconnect.googleapis.com"
   ]
 }
 
@@ -80,37 +85,18 @@ resource "google_project_iam_member" "sa_roles" {
     "roles/resourcemanager.projectIamAdmin", # Modify IAM policies (if TF manages IAM)
     "roles/secretmanager.secretAccessor",    # Access secrets from Secret Manager
     "roles/secretmanager.viewer",
-    "roles/serviceusage.serviceUsageAdmin", # Enable Cloud Build SA to list and enable APIs in the project.
+    "roles/serviceusage.serviceUsageAdmin",     # Enable Cloud Build SA to list and enable APIs in the project.
+    "roles/developerconnect.readTokenAccessor", # enable terrafor to read tokens for cloudbuild triggers.
+    "roles/developerconnect.user"               # enable terraform to reference repos
   ])
 
-  project = local.project_id
-  role    = each.key
-  member  = "serviceAccount:${google_service_account.cloudbuild_sa.email}"
+  project    = local.project_id
+  role       = each.key
+  member     = "serviceAccount:${google_service_account.cloudbuild_sa.email}"
+  depends_on = [google_project_service.services]
 }
 
-# Cloud Build Trigger
-resource "google_cloudbuild_trigger" "deploy_trigger" {
-  name        = "deploy-branch"
-  description = "Deploys application on push to branch"
-  location    = var.default_region
-  project     = local.project_id
 
-  # Link the specific Service Account here
-  service_account = google_service_account.cloudbuild_sa.id
-
-  # Connect to your GitHub Repo
-  github {
-    owner = var.github_org
-    name  = var.github_repo
-    push {
-      branch = var.branch_name
-    }
-  }
-
-  # Point to your build file
-  filename = var.cloudbuild_filename
-
-}
 
 # secrets for the terraform tfvars
 resource "google_secret_manager_secret" "tfvars" {
