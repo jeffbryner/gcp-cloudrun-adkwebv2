@@ -29,20 +29,31 @@ steps:
         echo "Found Bucket: $$BUCKET_NAME"
         echo "$$BUCKET_NAME" > /workspace/backend_bucket.txt
   # ---------------------------------------------------------
-  # Terraform Init
+  # Gcloud/Terraform apply
   # ---------------------------------------------------------   
-  - name: 'hashicorp/terraform:light'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim''
     dir: 'cicd/dev'
-    entrypoint: 'sh'
+    entrypoint: 'bash'
     args:
       - '-c'
       - |
-        # 1. Install Python (required for gcloud)
-        apk add --update python3 curl bash
+        # 1. Install utilities needed to download Terraform
+        # (The slim image needs these; standard might have them but this is safer)
+        apt-get -y update && apt-get -y install unzip wget
 
-        # 2. Download and install gcloud
-        curl -sSL https://sdk.cloud.google.com | bash
-        export PATH=$$PATH:/root/google-cloud-sdk/bin
+        # 2. Download Terraform (Change version 1.5.7 to whatever you use)
+        wget https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+
+        # 3. Unzip and move to path
+        unzip terraform_1.5.7_linux_amd64.zip
+        mv terraform /usr/bin/terraform
+        chmod +x /usr/bin/terraform
+
+        # 4. Verify both work
+        echo "Terraform Version:"
+        terraform --version
+        echo "Gcloud Version:"
+        gcloud --version
         gcloud auth list
 
         TF_BUCKET=$(cat /workspace/backend_bucket.txt)
