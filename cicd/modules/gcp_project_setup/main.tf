@@ -28,7 +28,8 @@ locals {
     "artifactregistry.googleapis.com",
     "run.googleapis.com",
     "cloudidentity.googleapis.com",
-    "appengine.googleapis.com"
+    "appengine.googleapis.com",
+    "developerconnect.googleapis.com"
   ]
 }
 
