@@ -43,6 +43,7 @@ steps:
         # 2. Download and install gcloud
         curl -sSL https://sdk.cloud.google.com | bash
         export PATH=$$PATH:/root/google-cloud-sdk/bin
+        gcloud auth list
 
         TF_BUCKET=$(cat /workspace/backend_bucket.txt)
         echo "Running Terraform Init..."
