@@ -10,18 +10,17 @@ module "gcp_project_setup" {
 
 }
 
-data "external" "git_sha" {
-  program = ["sh", "-c", "echo \"{\\\"sha\\\": \\\"$(git rev-parse --short HEAD)\\\"}\""]
-}
 
 locals {
-  project_id         = module.gcp_project_setup.project_id
-  location           = var.default_region
-  service_name       = var.service_name
-  cloudbuild_sa      = "serviceAccount:${module.gcp_project_setup.cloudbuild_sa.email}"
-  gar_repo_name      = "prj-containers" #container artifact registry repository
-  art_bucket_name    = format("bkt-%s-%s", "artifacts", local.project_id)
-  git_sha_tag        = data.external.git_sha.result.sha
+  project_id      = module.gcp_project_setup.project_id
+  location        = var.default_region
+  service_name    = var.service_name
+  cloudbuild_sa   = "serviceAccount:${module.gcp_project_setup.cloudbuild_sa.email}"
+  gar_repo_name   = "prj-containers" #container artifact registry repository
+  art_bucket_name = format("bkt-%s-%s", "artifacts", local.project_id)
+  # generate a hash of the source files to use as image tag
+  # this ensures new image is built only when source changes
+  # and the cloud run service is updated accordingly
   adk_web_hash       = sha1(join("", [for f in fileset(path.root, "../../src/container/**") : filesha1(f)]))
   adk_web_image_name = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/adk_web:${local.adk_web_hash}"
 }
@@ -165,7 +164,6 @@ resource "google_cloud_run_service" "default" {
     spec {
       service_account_name = google_service_account.cloudrun_service_identity.email
       containers {
-        #image = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/${local.service_name}"
         image = terraform_data.adk_web_build.output
 
       }
