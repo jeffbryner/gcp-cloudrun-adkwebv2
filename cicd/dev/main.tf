@@ -22,7 +22,8 @@ locals {
   gar_repo_name      = "prj-containers" #container artifact registry repository
   art_bucket_name    = format("bkt-%s-%s", "artifacts", local.project_id)
   git_sha_tag        = data.external.git_sha.result.sha
-  adk_web_image_name = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/adk_web:${local.git_sha_tag}"
+  adk_web_hash       = sha1(join("", [for f in fileset(path.root, "../../src/container/**") : filesha1(f)]))
+  adk_web_image_name = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/adk_web:${local.adk_web_hash}"
 }
 
 
@@ -31,7 +32,9 @@ resource "terraform_data" "adk_web_build" {
 
   triggers_replace = [
     # Only triggers when actual code changes
-    sha1(join("", [for f in fileset(path.root, "../../src/container/**") : filesha1(f)]))
+    # use the hash as the image tag as well
+    # to ensure cloud run gets updated image
+    local.adk_web_hash
   ]
 
   provisioner "local-exec" {
@@ -163,7 +166,7 @@ resource "google_cloud_run_service" "default" {
       service_account_name = google_service_account.cloudrun_service_identity.email
       containers {
         #image = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/${local.service_name}"
-        image = terraform_data.adk_web_build.output
+        image = local.adk_web_image_name
 
       }
     }
