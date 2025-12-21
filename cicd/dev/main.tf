@@ -166,7 +166,7 @@ resource "google_cloud_run_service" "default" {
       service_account_name = google_service_account.cloudrun_service_identity.email
       containers {
         #image = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/${local.service_name}"
-        image = local.adk_web_image_name
+        image = terraform_data.adk_web_build.output
 
       }
     }
