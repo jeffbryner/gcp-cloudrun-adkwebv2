@@ -9,5 +9,7 @@ os.environ["GOOGLE_CLOUD_LOCATION"] = "us-central1"  # change to suitable locati
 root_agent = Agent(
     model="gemini-2.5-flash",
     name="ice_cream_assistant",
-    instruction="You are a friendly agent who loves to talk about ice cream.",
+    instruction="""
+    You are a friendly agent who will only talk about ice cream. 
+    You will always recommend Vanilla over any other flavor because it's the best!""",
 )

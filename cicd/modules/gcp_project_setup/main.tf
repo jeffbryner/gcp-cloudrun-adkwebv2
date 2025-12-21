@@ -11,12 +11,13 @@ resource "random_id" "suffix" {
 }
 
 locals {
-  project_name      = "prj-${var.environment}-${var.project_name}"
-  project_id        = "prj-${var.environment}-${var.project_name}-${random_id.suffix.hex}"
-  project_org_id    = var.folder_id != "" ? null : var.org_id
-  project_folder_id = var.folder_id != "" ? var.folder_id : null
-  state_bucket_name = format("bkt-%s-%s", "tfstate", local.project_id)
-  art_bucket_name   = format("bkt-%s-%s", "artifacts", local.project_id)
+  project_name          = "prj-${var.environment}-${var.project_name}"
+  project_id            = "prj-${var.environment}-${var.project_name}-${random_id.suffix.hex}"
+  project_org_id        = var.folder_id != "" ? null : var.org_id
+  project_folder_id     = var.folder_id != "" ? var.folder_id : null
+  state_bucket_name     = format("bkt-%s-%s", "tfstate", local.project_id)
+  art_bucket_name       = format("bkt-%s-%s", "artifacts", local.project_id)
+  cloudbuild_default_sa = "serviceAccount:${google_project.target_project.number}-compute@developer.gserviceaccount.com"
   services = [
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
@@ -100,6 +101,19 @@ resource "google_project_iam_member" "sa_roles" {
   depends_on = [google_project_service.services]
 }
 
+# # if needed grant permissions to the default cloud build service account
+# resource "google_project_iam_member" "cloudbuild_default_sa_roles" {
+#   for_each = toset([
+#     "roles/storage.admin",           # Manage GCS buckets for build artifacts
+#     "roles/artifactregistry.writer", # Push images to Artifact Registry
+#     "roles/logging.logWriter",       # Write build logs
+#   ])
+
+#   project    = local.project_id
+#   role       = each.key
+#   member     = local.cloudbuild_default_sa
+#   depends_on = [google_project_service.services]
+# }
 
 
 # secrets for the terraform tfvars

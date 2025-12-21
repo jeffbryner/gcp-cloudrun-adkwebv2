@@ -10,6 +10,7 @@ module "gcp_project_setup" {
 
 }
 
+
 locals {
   project_id      = module.gcp_project_setup.project_id
   location        = var.default_region
@@ -17,19 +18,35 @@ locals {
   cloudbuild_sa   = "serviceAccount:${module.gcp_project_setup.cloudbuild_sa.email}"
   gar_repo_name   = "prj-containers" #container artifact registry repository
   art_bucket_name = format("bkt-%s-%s", "artifacts", local.project_id)
+  # generate a hash of the source files to use as image tag
+  # this ensures new image is built only when source changes
+  # and the cloud run service is updated accordingly
+  adk_web_hash       = sha1(join("", [for f in fileset(path.root, "../../src/container/**") : filesha1(f)]))
+  adk_web_image_name = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/adk_web:${local.adk_web_hash}"
 }
 
-# trigger builds on file changes in the container directory
-resource "null_resource" "cloudbuild_cloudrun_container" {
-  triggers = {
-    dir_sha1 = sha1(join("", [for f in fileset(path.root, "../../src/container/**") : filesha1(f)]))
-  }
 
+resource "terraform_data" "adk_web_build" {
+  input = local.adk_web_image_name # the image name with tag
+
+  triggers_replace = [
+    # Only triggers when actual code changes
+    # use the hash as the image tag as well
+    # to ensure cloud run gets updated image
+    local.adk_web_hash
+  ]
 
   provisioner "local-exec" {
+    # We use a cloudbuild config,
+    # but pass in a specific Dockerfile and Image Name
+    # to allow one build with multiple docker images/cloud run services
+    # if needed (one for adk web, one for agent api, etc)
     command = <<EOT
-    gcloud builds submit ../../src/container/ --project ${local.project_id}  --substitutions=_SERVICE_NAME=${local.service_name} --config=../../src/container/cloudbuild.yaml --service-account=${module.gcp_project_setup.cloudbuild_sa.id}
-  EOT
+        gcloud builds submit ../../src/container \
+          --config=../../src/container/cloudbuild.yaml \
+          --substitutions=_DOCKERFILE=adk.web.Dockerfile,_IMAGE=${self.input} \
+          --service-account=${module.gcp_project_setup.cloudbuild_sa.id}          
+      EOT
   }
 }
 
@@ -147,7 +164,7 @@ resource "google_cloud_run_service" "default" {
     spec {
       service_account_name = google_service_account.cloudrun_service_identity.email
       containers {
-        image = "${local.location}-docker.pkg.dev/${local.project_id}/${local.gar_repo_name}/${local.service_name}"
+        image = terraform_data.adk_web_build.output
 
       }
     }
